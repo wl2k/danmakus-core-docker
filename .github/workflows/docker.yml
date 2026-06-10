@@ -12,10 +12,19 @@ jobs:
   cmp:
     uses: WaterLemons2k/.github/.github/workflows/compare.yml@main
     with:
-      new: $(curl -s https://api.github.com/users/81f9db2ec2/packages/container/danmakus-core-docker/versions | jq .[0].id)
+      new: $(GH_TOKEN=${{ github.token }} gh api users/81f9db2ec2/packages/container/danmakus-core-docker/versions | jq -r .[0].id)
+    
+  git:
+    needs: cmp
+    if: needs.cmp.outputs.changed == 'true'
+    uses: WaterLemons2k/.github/.github/workflows/git.yml@main
+    with:
+      run: |
+        VERSION=${{ needs.cmp.outputs.version }}
+      commit_message: "chore: update danmakus-core"
 
   docker:
-    needs: cmp
+    needs: [cmp, git]
     if: needs.cmp.outputs.changed == 'true'
     runs-on: ubuntu-slim
     steps:
@@ -54,7 +63,7 @@ jobs:
           password: ${{ github.token }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@6
+        uses: docker/build-push-action@v6
         with:
           context: ./danmakus-core
           push: true
