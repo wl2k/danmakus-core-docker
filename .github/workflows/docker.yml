@@ -16,7 +16,13 @@ jobs:
     steps:
       - name: Get id
         id: id
-        run: echo "ID=$(gh api users/81f9db2ec2/packages/container/danmakus-client/versions | jq .[0].id)" >>"$GITHUB_ENV"
+        run: |
+          VERSIONS=$(gh api users/81f9db2ec2/packages/container/danmakus-core/versions)
+          if [ $? -ne 0 || -z "$VERSIONS" ]; then
+            echo "gh api failed or no versions found, skipping"
+            exit 1
+          fi
+          echo "ID=$(echo "$VERSIONS" | jq .[0].id)" >>"$GITHUB_ENV"
         env:
           GH_TOKEN: ${{ github.token }}
 
