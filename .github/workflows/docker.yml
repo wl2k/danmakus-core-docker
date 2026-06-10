@@ -12,7 +12,8 @@ jobs:
   cmp:
     uses: WaterLemons2k/.github/.github/workflows/compare.yml@main
     with:
-      new: $(GH_TOKEN=${{ github.token }} gh api users/81f9db2ec2/packages/container/danmakus-client/versions | jq -r .[0].id)
+      pre: echo "GH_TOKEN=${{ github.token }}" >>"$GITHUB_ENV"
+      new: $(gh api users/81f9db2ec2/packages/container/danmakus-client/versions | jq -r .[0].id)
     
   git:
     needs: cmp
@@ -26,7 +27,7 @@ jobs:
   docker:
     needs: [cmp, git]
     if: needs.cmp.outputs.changed == 'true'
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout upstream
         uses: actions/checkout@v6
@@ -43,7 +44,7 @@ jobs:
 
       - name: Get version
         id: ver
-        run: echo "version=$(jq -r .version package.json)" >>"$GITHUB_OUTPUT"
+        run: echo "version=$(jq -r .version danmakus-core/package.json)" >>"$GITHUB_OUTPUT"
 
       - name: Metadata
         id: meta
