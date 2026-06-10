@@ -12,7 +12,7 @@ jobs:
   cmp:
     uses: WaterLemons2k/.github/.github/workflows/compare.yml@main
     with:
-      new: $(GH_TOKEN=${{ github.token }} gh api users/81f9db2ec2/packages/container/danmakus-core-docker/versions | jq -r .[0].id)
+      new: $(GH_TOKEN=${{ github.token }} gh api users/81f9db2ec2/packages/container/danmakus-client/versions | jq -r .[0].id)
     
   git:
     needs: cmp
@@ -31,7 +31,7 @@ jobs:
       - name: Checkout upstream
         uses: actions/checkout@v6
         with:
-          repository: 81f9db2ec2/danmakus-core-docker
+          repository: 81f9db2ec2/danmakus-client
 
       - name: Checkout
         uses: actions/checkout@v6
