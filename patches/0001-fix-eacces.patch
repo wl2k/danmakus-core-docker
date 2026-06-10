@@ -1,0 +1,13 @@
+diff --git a/danmakus-core/Dockerfile b/danmakus-core/Dockerfile
+index b6ccc1c..3bbc27c 100644
+--- a/danmakus-core/Dockerfile
++++ b/danmakus-core/Dockerfile
+@@ -16,7 +16,7 @@ RUN bun build --compile --minify --target=bun-linux-x64-musl ./src/cli/index.ts
+ FROM alpine:3.20 AS release
+ 
+ ENV NODE_ENV=production
+-WORKDIR /app
++WORKDIR /home/danmakus
+ 
+ RUN apk add --no-cache libstdc++ libgcc \
+     && addgroup -S danmakus \

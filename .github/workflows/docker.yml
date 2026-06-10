@@ -1,0 +1,65 @@
+name: Docker
+
+on:
+  push:
+  schedule:
+    - cron: 0 0 * * 0
+
+permissions:
+  packages: write
+
+env:
+  REPO_OWNER: 81f9db2ec2
+  REPO_NAME: danmakus-core-docker
+
+jobs:
+  cmp:
+    uses: WaterLemons2k/.github/.github/workflows/compare.yml@main
+    with:
+      new: $(curl -s https://api.github.com/users/${{ env.REPO_OWNER }}/packages/container/${{ env.REPO_NAME }}/versions | jq .[0].id)
+
+  docker:
+    needs: cmp
+    if: needs.cmp.outputs.changed == 'true'
+    runs-on: ubuntu-slim
+    steps:
+      - name: Checkout upstream
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ env.REPO_OWNER }}/${{ env.REPO_NAME }}
+
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          path: docker
+
+      - name: Apply patch
+        run: git apply docker/patches/0001-fix-eacces.patch
+
+      - name: get version
+        id: ver
+        run: echo "version=$(jq -r .version package.json)" >>"$GITHUB_OUTPUT"
+
+      - name: Metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/wl2k/danmakus-core
+          tags: |
+            type=raw,value=latest
+            type=raw,value=v${{ steps.ver.outputs.version }}
+            type=sha
+
+      - name: Login to ghcr.io
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@6
+        with:
+          context: ./danmakus-core
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
