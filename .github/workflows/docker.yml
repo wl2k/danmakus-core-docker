@@ -9,12 +9,23 @@ permissions:
   packages: write
 
 jobs:
+  pre:
+    runs-on: ubuntu-latest
+    outputs:
+      id: ${{ env.ID }}
+    steps:
+      - name: Get id
+        id: id
+        run: echo "ID=$(gh api users/81f9db2ec2/packages/container/danmakus-client/versions | jq .[0].id)" >>"$GITHUB_ENV"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
   cmp:
+    needs: pre
     uses: WaterLemons2k/.github/.github/workflows/compare.yml@main
     with:
-      pre: echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >>"$GITHUB_ENV"
-      new: $(gh api users/81f9db2ec2/packages/container/danmakus-client/versions | jq -r .[0].id)
-    
+      new: ${{ needs.pre.outputs.id }}
+
   git:
     needs: cmp
     if: needs.cmp.outputs.changed == 'true'
@@ -22,7 +33,7 @@ jobs:
     with:
       run: |
         VERSION=${{ needs.cmp.outputs.version }}
-      commit_message: "chore: update danmakus-core"
+      commit_message: 'chore: update danmakus-core'
 
   docker:
     needs: [cmp, git]
