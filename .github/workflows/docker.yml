@@ -12,7 +12,7 @@ jobs:
   cmp:
     uses: WaterLemons2k/.github/.github/workflows/compare.yml@main
     with:
-      pre: echo "GH_TOKEN=${{ github.token }}" >>"$GITHUB_ENV"
+      pre: echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >>"$GITHUB_ENV"
       new: $(gh api users/81f9db2ec2/packages/container/danmakus-client/versions | jq -r .[0].id)
     
   git:
