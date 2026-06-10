@@ -8,15 +8,11 @@ on:
 permissions:
   packages: write
 
-env:
-  REPO_OWNER: 81f9db2ec2
-  REPO_NAME: danmakus-core-docker
-
 jobs:
   cmp:
     uses: WaterLemons2k/.github/.github/workflows/compare.yml@main
     with:
-      new: $(curl -s https://api.github.com/users/${{ env.REPO_OWNER }}/packages/container/${{ env.REPO_NAME }}/versions | jq .[0].id)
+      new: $(curl -s https://api.github.com/users/81f9db2ec2/packages/container/danmakus-core-docker/versions | jq .[0].id)
 
   docker:
     needs: cmp
@@ -26,7 +22,7 @@ jobs:
       - name: Checkout upstream
         uses: actions/checkout@v6
         with:
-          repository: ${{ env.REPO_OWNER }}/${{ env.REPO_NAME }}
+          repository: 81f9db2ec2/danmakus-core-docker
 
       - name: Checkout
         uses: actions/checkout@v6
@@ -36,7 +32,7 @@ jobs:
       - name: Apply patch
         run: git apply docker/patches/0001-fix-eacces.patch
 
-      - name: get version
+      - name: Get version
         id: ver
         run: echo "version=$(jq -r .version package.json)" >>"$GITHUB_OUTPUT"
 
