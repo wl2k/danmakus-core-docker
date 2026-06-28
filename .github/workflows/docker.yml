@@ -39,7 +39,8 @@ jobs:
     with:
       run: |
         VERSION=${{ needs.cmp.outputs.version }}
-      commit_message: 'chore: update danmakus-core'
+        echo "$VERSION" >VERSION
+      commit_message: 'chore: bump danmakus-core to ${{ needs.cmp.outputs.version }}'
 
   docker:
     needs: [cmp, git]
@@ -57,7 +58,7 @@ jobs:
           path: docker
 
       - name: Apply patch
-        run: git apply docker/patches/0001-fix-eacces.patch
+        run: git apply docker/patches/*.patch
 
       - name: Get version
         id: ver
